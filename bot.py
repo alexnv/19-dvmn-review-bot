@@ -8,13 +8,37 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
+logger = logging.getLogger('dvmn-review-bot')
+
+
+class TelegramLogsHandler(logging.Handler):
+
+    def __init__(self, tg_bot, tg_chat_id):
+        super().__init__()
+
+        logging_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s -  %(message)s - %(exc_info)s')
+        self.setFormatter(fmt=logging_format)
+
+        self.tg_bot = tg_bot
+        self.tg_chat_id = tg_chat_id
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.tg_bot.send_message(chat_id=self.tg_chat_id, text=log_entry)
+
 
 def main():
     load_dotenv()
     telegram_token = os.environ["TELEGRAM_TOKEN"]
     telegram_chat_id = os.environ['TELEGRAM_CHAT_ID']
     devman_apikey = os.environ["DEVMAN_APIKEY"]
-    logging.basicConfig(level=logging.INFO)
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s -  %(message)s - %(exc_info)s',
+        datefmt='%m/%d/%Y %I:%M:%S %p'
+    )
+    logger.addHandler(TelegramLogsHandler(tg_bot=telegram_token, tg_chat_id=telegram_chat_id))
 
     dvmn_lp_url = 'https://dvmn.org/api/long_polling/'
     headers = {'Authorization': f'Token {devman_apikey}'}
@@ -51,16 +75,16 @@ def main():
                     chat_id=telegram_chat_id,
                 )
         except requests.exceptions.ReadTimeout:
-            logging.info('Истекло время ожидания, повторный запрос...')
+            logger.info('Истекло время ожидания, повторный запрос...')
             continue
 
         except requests.ConnectionError:
-            logging.info('Ошибка соединения, повторная попытка через 60 секунд.')
+            logger.info('Ошибка соединения, повторная попытка через 60 секунд.')
             sleep(60)
             continue
 
         except Exception:
-            logging.warning('Непредвиденная ошибка!', exc_info=sys.exc_info())
+            logger.warning('Непредвиденная ошибка!', exc_info=sys.exc_info())
             continue
 
 
