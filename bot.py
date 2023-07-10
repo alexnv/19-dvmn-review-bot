@@ -45,6 +45,7 @@ def main():
     params = {}
 
     tg_bot = telegram.Bot(token=telegram_token)
+    logging.info('Бот запущен.')
 
     logging.info('Бот запущен.')
     while True:

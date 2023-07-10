@@ -48,6 +48,28 @@ pip install -r requirements.txt
 python bot.py
 ```
 
+### Docker
+
+Для использования Docker контейнера, необходимо установить [Docker](https://www.docker.com/)
+
+Для создания образа контейнера выполните команду в консоли
+
+```commandline
+docker build -t dvmn_review_bot         # create image from directory with code
+```
+
+Создайте файл `.env` со следующими переменными:
+* DEVMAN_APIKEY=[Devman](https://dvmn.org/api/docs/) API token
+* TELEGRAM_TOKEN=telegram bot token
+* TELEGRAM_CHAT_ID=your telegram chat id
+
+Для запуска контейнера на локальной машине выполните команду:
+
+```commandline
+docker run -d -p 80:80 --env-file [path_to_.env] [image_name]
+```
+
+
 ## Результат выполнения
 
 После проверки вашей работы, Вам придет уведомление:
